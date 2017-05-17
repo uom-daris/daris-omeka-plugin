@@ -24,6 +24,7 @@ public class SvcFileUpdate extends OmekaPluginService {
     }
     
     static void addToDefinition(Interface defn){
+        defn.add(new Interface.Element("item", LongType.POSITIVE_ONE, "item.", 1,1));
         defn.add(new Interface.Element("order", LongType.POSITIVE_ONE, "order.", 1,1));
         Interface.Element et = new Interface.Element("element_text", XmlDocType.DEFAULT, "Element text.", 1,
                 Integer.MAX_VALUE);
@@ -35,6 +36,9 @@ public class SvcFileUpdate extends OmekaPluginService {
     
     static FileBuilder parse(XmlDoc.Element args) throws Throwable {
         FileBuilder fb = new FileBuilder();
+        if(args.elementExists("item")){
+            fb.setItemId(args.longValue("item"));
+        }
         if(args.elementExists("order")){
             fb.setOrder(args.longValue("order"));
         }
