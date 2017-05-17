@@ -57,7 +57,7 @@ public class SvcItemCreate extends OmekaPluginService {
             for (XmlDoc.Element et : ets) {
                 boolean html = et.booleanValue("html", false);
                 String text = et.value("text");
-                long elementId = et.longValue("element/id");
+                long elementId = et.longValue("element");
                 ib.addElementText(html, text, elementId);
             }
         }
