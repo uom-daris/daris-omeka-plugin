@@ -68,10 +68,10 @@ public class File extends EntityBase {
         public final String squareThumbnail;
 
         FileUrls(JSONObject jo) {
-            this.original = jo.getString("original");
-            this.fullsize = jo.getString("fullsize");
-            this.thumbnail = jo.getString("thumbnail");
-            this.squareThumbnail = jo.getString("square_thumbnail");
+            this.original = JSONUtils.getStringValue(jo, "original");
+            this.fullsize = JSONUtils.getStringValue(jo, "fullsize");
+            this.thumbnail = JSONUtils.getStringValue(jo, "thumbnail");
+            this.squareThumbnail = JSONUtils.getStringValue(jo, "square_thumbnail");
         }
     }
 
@@ -87,7 +87,7 @@ public class File extends EntityBase {
     private long _size;
     private boolean _stored;
     private String _typeOS;
-    private JSONObject _metadata;
+    private Object _metadata;
     private EntityInfo _item;
     private List<ElementText> _elementTexts;
     private List<ExtendedResourceInfo> _extendedResources;
@@ -106,7 +106,14 @@ public class File extends EntityBase {
         _size = jo.getLong("size");
         _stored = jo.getBoolean("stored");
         _typeOS = jo.getString("type_os");
-        _metadata = jo.getJSONObject("metadata");
+        if (jo.has("metadata")&&!jo.isNull("metadata")) {
+            _metadata = jo.get("metadata");
+            if (_metadata instanceof JSONArray) {
+                if(((JSONArray)_metadata).length()<=0){
+                    _metadata = null;
+                }
+            } 
+        }
         _item = EntityInfo.instantiate(jo, "item");
         _elementTexts = ElementText.instantiateList(jo, "element_texts");
         _extendedResources = ExtendedResourceInfo.instantiateList(jo, "extended_resources");
@@ -160,7 +167,7 @@ public class File extends EntityBase {
         return _typeOS;
     }
 
-    public JSONObject metadata() {
+    public Object metadata() {
         return _metadata;
     }
 

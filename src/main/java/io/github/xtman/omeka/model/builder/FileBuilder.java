@@ -57,13 +57,14 @@ public class FileBuilder implements EntityBuilder {
             itemJO.put("id", _itemId);
             jo.put("item", itemJO);
         }
-        JSONArray elementTextJA = new JSONArray();
         if (!_elementTexts.isEmpty()) {
+            JSONArray elementTextJA = new JSONArray();
             for (ElementTextBuilder et : _elementTexts) {
                 elementTextJA.put(et.build());
             }
+            jo.put("element_texts", elementTextJA);
         }
-        jo.put("element_texts", elementTextJA);
+        
         return jo;
     }
 

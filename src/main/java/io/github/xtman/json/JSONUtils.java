@@ -105,7 +105,7 @@ public class JSONUtils {
 
     public static String getStringValue(JSONObject jo, String key, boolean allowEmpty, String defaultValue) {
         if (jo != null) {
-            if (jo.has(key)) {
+            if (jo.has(key) && !jo.isNull(key)) {
                 String value = jo.getString(key);
                 if (!value.isEmpty() || allowEmpty) {
                     return value;

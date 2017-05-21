@@ -11,12 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.github.xtman.http.exception.HttpException;
 import io.github.xtman.io.StreamUtils;
 
 public class HttpClientBase implements HttpClient {
-
-    private static final String IOEXCEPTION_MESSAGE_PREFIX = "Server returned HTTP response code: ";
 
     @Override
     public <T> T execute(HttpRequest request, HttpResponseHandler<T> responseHandler) throws Throwable {
@@ -50,12 +47,14 @@ public class HttpClientBase implements HttpClient {
             }
             int responseCode = conn.getResponseCode();
             String responseMessage = conn.getResponseMessage();
+            Map<String, List<String>> responseHeaders = conn.getHeaderFields();
             try {
                 responseInputStream = conn.getInputStream();
             } catch (FileNotFoundException e) {
                 responseInputStream = null;
+            } catch (java.io.IOException ioe) {
+                responseInputStream = conn.getErrorStream();
             }
-            Map<String, List<String>> responseHeaders = conn.getHeaderFields();
             try {
                 if (responseHandler != null) {
                     return responseHandler.handleResponse(request,
@@ -67,16 +66,6 @@ public class HttpClientBase implements HttpClient {
                 if (responseInputStream != null) {
                     responseInputStream.close();
                 }
-            }
-        } catch (java.io.IOException ioe) {
-            String msg = ioe.getMessage();
-            if (msg != null && msg.startsWith(IOEXCEPTION_MESSAGE_PREFIX)) {
-                int startIdx = IOEXCEPTION_MESSAGE_PREFIX.length();
-                int endIdx = startIdx + 3;
-                int responseCode = Integer.parseInt(msg.substring(startIdx, endIdx));
-                throw new HttpException(responseCode, null, request.requestUri(), request.requestMethod(), ioe);
-            } else {
-                throw ioe;
             }
         } finally {
             conn.disconnect();

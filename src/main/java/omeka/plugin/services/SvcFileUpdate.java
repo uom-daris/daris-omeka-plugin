@@ -25,8 +25,8 @@ public class SvcFileUpdate extends OmekaPluginService {
     
     static void addToDefinition(Interface defn){
         defn.add(new Interface.Element("item", LongType.POSITIVE_ONE, "item.", 1,1));
-        defn.add(new Interface.Element("order", LongType.POSITIVE_ONE, "order.", 1,1));
-        Interface.Element et = new Interface.Element("element_text", XmlDocType.DEFAULT, "Element text.", 1,
+        defn.add(new Interface.Element("order", LongType.POSITIVE_ONE, "order.", 0,1));
+        Interface.Element et = new Interface.Element("element_text", XmlDocType.DEFAULT, "Element text.", 0,
                 Integer.MAX_VALUE);
         et.add(new Interface.Element("html", BooleanType.DEFAULT, "Is html? ", 0, 1));
         et.add(new Interface.Element("text", StringType.DEFAULT, "text.", 1, 1));

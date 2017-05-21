@@ -14,7 +14,7 @@ import io.github.xtman.omeka.model.builder.FileBuilder;
 
 public class PostFileCommand extends PostEntityCommand<File> {
 
-    public static final String BOUNDARY = "------------E19zNvXGzXaLvS5C";
+    public static final String BOUNDARY = "E19zNvXGzXaLvS5C";
 
     private InputStream _in;
     private long _length;
@@ -22,6 +22,7 @@ public class PostFileCommand extends PostEntityCommand<File> {
     public PostFileCommand(OmekaClient client, FileBuilder fileMeta, String fileName, InputStream in, long length,
             String mimeType) {
         super(client, "files", fileMeta);
+        this.setRequestProperty("Connection", "close");
 
         /*
          * Close the stream in the super class.
@@ -36,15 +37,19 @@ public class PostFileCommand extends PostEntityCommand<File> {
 
         _length = 0;
         Vector<InputStream> iss = new Vector<InputStream>(3);
-        byte[] prefixBytes = prefix(fileMeta, fileName, length, mimeType).getBytes();
+        String prefix = prefix(fileMeta, fileName, length, mimeType);
+        byte[] prefixBytes = prefix.getBytes();
         _length += prefixBytes.length;
+
         iss.add(new ByteArrayInputStream(prefixBytes));
 
         _length += length;
         iss.add(in);
 
-        byte[] suffixBytes = BOUNDARY.getBytes();
+        String suffix = "\r\n--" + BOUNDARY;
+        byte[] suffixBytes = suffix.getBytes();
         _length += suffixBytes.length;
+
         iss.add(new ByteArrayInputStream(suffixBytes));
 
         _in = new SequenceInputStream(iss.elements());
@@ -62,21 +67,26 @@ public class PostFileCommand extends PostEntityCommand<File> {
     }
 
     @Override
+    public String requestContentType() {
+        return "multipart/form-data; boundary=" + BOUNDARY;
+    }
+
+    @Override
     protected File instantiate(JSONObject jo) throws Throwable {
         return new File(jo);
     }
 
     static String prefix(FileBuilder fileMeta, String fileName, long length, String mimeType) {
         StringBuilder sb = new StringBuilder();
-        sb.append(BOUNDARY).append("\r\n");
+        sb.append("--").append(BOUNDARY).append("\r\n");
         sb.append("Content-Disposition: form-data; name=\"data\"\r\n");
         sb.append("\r\n");
         sb.append(fileMeta.build().toString()).append("\r\n");
-        sb.append(BOUNDARY).append("\r\n");
+        sb.append("--").append(BOUNDARY).append("\r\n");
         sb.append(String.format("Content-Disposition: form-data; name=\"file\"; filename=\"%s\"", fileName))
                 .append("\r\n");
         sb.append(String.format("Content-Type: %s", mimeType));
-        sb.append("\r\n");
+        sb.append("\r\n\r\n");
         return sb.toString();
     }
 
