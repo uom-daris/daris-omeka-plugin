@@ -17,7 +17,7 @@ public class SvcFileDelete extends OmekaPluginService {
     protected void execute(OmekaClient omekaClient, Element args, Inputs inputs, Outputs outputs, XmlWriter w)
             throws Throwable {
         long id = args.longValue("id");
-        omekaClient.deleteCollection(id);
+        omekaClient.deleteFile(id);
     }
 
     @Override
