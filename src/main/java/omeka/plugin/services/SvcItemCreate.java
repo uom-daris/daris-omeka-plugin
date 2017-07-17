@@ -28,7 +28,7 @@ public class SvcItemCreate extends OmekaPluginService {
         defn.add(new Interface.Element("public", BooleanType.DEFAULT, "Is public? Defaults to true.", 0, 1));
         defn.add(new Interface.Element("featured", BooleanType.DEFAULT, "Is featured? Defaults to false.", 0, 1));
         defn.add(new Interface.Element("tag", StringType.DEFAULT, "Tag.", 0, Integer.MAX_VALUE));
-        Interface.Element et = new Interface.Element("element_text", XmlDocType.DEFAULT, "Element text.", 1,
+        Interface.Element et = new Interface.Element("element_text", XmlDocType.DEFAULT, "Element text.", 0,
                 Integer.MAX_VALUE);
         et.add(new Interface.Element("html", BooleanType.DEFAULT, "Is html? ", 0, 1));
         et.add(new Interface.Element("text", StringType.DEFAULT, "text.", 1, 1));

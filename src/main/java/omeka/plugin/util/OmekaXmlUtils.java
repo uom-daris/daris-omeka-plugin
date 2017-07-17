@@ -4,6 +4,7 @@ import java.util.List;
 
 import arc.xml.XmlDoc;
 import arc.xml.XmlWriter;
+import io.github.xtman.json.JSON2XML;
 import io.github.xtman.omeka.client.util.OmekaDateUtils;
 import io.github.xtman.omeka.model.Collection;
 import io.github.xtman.omeka.model.Element;
@@ -309,7 +310,7 @@ public class OmekaXmlUtils {
     }
 
     public static void saveItemTypeXml(ItemType it, XmlWriter w) throws Throwable {
-        w.push("item", new String[] { "id", Long.toString(it.id()) });
+        w.push("item_type", new String[] { "id", Long.toString(it.id()) });
         saveEntityBaseXml(it, w);
         if (it.name() != null) {
             w.add("name", it.name());
@@ -367,7 +368,11 @@ public class OmekaXmlUtils {
             w.add("type_os", f.typeOS());
         }
         if (f.metadata() != null) {
-            XmlDoc.Element me = new XmlDoc().parse("<metadata>" + org.json.XML.toString(f.metadata()) + "</metadata>");
+            StringBuilder sb = new StringBuilder();
+            sb.append("<metadata>");
+            sb.append(JSON2XML.toString(f.metadata()));
+            sb.append("</metadata>");
+            XmlDoc.Element me = new XmlDoc().parse(sb.toString());
             w.add(me);
         }
         if (f.item() != null) {

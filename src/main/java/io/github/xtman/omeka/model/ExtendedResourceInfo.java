@@ -1,5 +1,6 @@
 package io.github.xtman.omeka.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -25,7 +26,14 @@ public class ExtendedResourceInfo {
 
     public static List<ExtendedResourceInfo> instantiateList(JSONObject jo, String key) throws Throwable {
         if (jo.has(key)) {
-            return instantiateList(jo.getJSONArray(key));
+            Object o = jo.get(key);
+            if (o instanceof JSONObject) {
+                List<ExtendedResourceInfo> list = new ArrayList<ExtendedResourceInfo>(1);
+                list.add(new ExtendedResourceInfo((JSONObject) o));
+                return list;
+            } else {
+                return instantiateList(jo.getJSONArray(key));
+            }
         }
         return null;
     }
