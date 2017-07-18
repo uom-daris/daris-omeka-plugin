@@ -50,12 +50,12 @@ public class JSON2XML {
      *            The string to be escaped.
      * @return The escaped string.
      */
-    public static String escape(String string) {
+    public static String escapeValue(String string) {
         StringBuilder sb = new StringBuilder(string.length());
         for (int i = 0, length = string.length(); i < length; i++) {
             char c = string.charAt(i);
             if (c >= '\u0000' && c < '\u0020') {
-                sb.append(String.format("\\u%04x", (int)c));
+                sb.append(String.format("\\u%04x", (int) c));
                 continue;
             }
             switch (c) {
@@ -384,6 +384,9 @@ public class JSON2XML {
             keys = jo.keys();
             while (keys.hasNext()) {
                 key = keys.next();
+                if (Character.isDigit(key.charAt(0))) {
+                    key = "_" + key;
+                }
                 value = jo.opt(key);
                 if (value == null) {
                     value = "";
@@ -401,11 +404,11 @@ public class JSON2XML {
                             if (i > 0) {
                                 sb.append('\n');
                             }
-                            sb.append(escape(val.toString()));
+                            sb.append(escapeValue(val.toString()));
                             i++;
                         }
                     } else {
-                        sb.append(escape(value.toString()));
+                        sb.append(escapeValue(value.toString()));
                     }
 
                     // Emit an array of similar keys
@@ -464,7 +467,7 @@ public class JSON2XML {
             }
         }
 
-        string = (object == null) ? "null" : escape(object.toString());
+        string = (object == null) ? "null" : escapeValue(object.toString());
         return (tagName == null) ? "\"" + string + "\""
                 : (string.length() == 0) ? "<" + tagName + "/>" : "<" + tagName + ">" + string + "</" + tagName + ">";
 
