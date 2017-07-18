@@ -86,4 +86,8 @@ public class ResultSet<T extends Entity> {
         return null;
     }
 
+    public boolean isEmpty() {
+        return _results == null || _results.isEmpty();
+    }
+
 }
