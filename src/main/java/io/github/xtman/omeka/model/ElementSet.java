@@ -45,7 +45,13 @@ public class ElementSet extends EntityBase {
         super(jo);
         _name = jo.getString("name");
         _description = jo.getString("description");
-        _recordType = jo.getString("record_type");
+        Object o = jo.get("record_type");
+        if (o != null) {
+            String v = String.valueOf(o);
+            if (!"null".equalsIgnoreCase(v)) {
+                _recordType = v;
+            }
+        }
         _elements = EntitySetInfo.instantiate(jo, "elements");
         _extendedResources = ExtendedResourceInfo.instantiateList(jo, "extended_resources");
     }
