@@ -21,7 +21,7 @@ public abstract class OmekaEntityListPluginService<T extends Entity> extends Ome
         defn.add(new Interface.Element("size", IntegerType.POSITIVE_ONE,
                 "Number of results to return. Defaults to 100.", 0, 1));
         defn.add(new Interface.Element("detail", BooleanType.DEFAULT,
-                "Include details about the entity. Defaults to true."));
+                "Include details about the entity. Defaults to false.", 0, 1));
 
     }
 
@@ -32,7 +32,7 @@ public abstract class OmekaEntityListPluginService<T extends Entity> extends Ome
         int pageSize = args.intValue("size", 100);
         long pageIndex = (idx - 1) / pageSize + 1;
         int remainder = (int) ((idx - 1) % pageSize);
-        boolean detail = args.booleanValue("detail", true);
+        boolean detail = args.booleanValue("detail", false);
 
         ResultSet<T> rs1 = listEntities(omekaClient, pageIndex, pageSize, args);
         long total = rs1.totalNumberOfResults();
@@ -61,7 +61,8 @@ public abstract class OmekaEntityListPluginService<T extends Entity> extends Ome
     protected abstract ResultSet<T> listEntities(OmekaClient omekaClient, long pageIndex, int pageSize, Element args)
             throws Throwable;
 
-    protected void describeEntities(long idx, List<T> entities, long total, XmlWriter w, boolean detail) throws Throwable {
+    protected void describeEntities(long idx, List<T> entities, long total, XmlWriter w, boolean detail)
+            throws Throwable {
         if (entities != null) {
             for (T entity : entities) {
                 describeEntity(entity, w, detail);
