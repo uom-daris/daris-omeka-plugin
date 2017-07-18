@@ -20,8 +20,8 @@ public class SvcTagList extends OmekaEntityListPluginService<Tag> {
     }
 
     @Override
-    protected void describeEntity(Tag tag, XmlWriter w) throws Throwable {
-        OmekaXmlUtils.saveTagXml(tag, w);
+    protected void describeEntity(Tag tag, XmlWriter w, boolean detail) throws Throwable {
+        OmekaXmlUtils.saveTagXml(tag, w, detail);
     }
 
     @Override

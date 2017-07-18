@@ -20,7 +20,7 @@ public class SvcTagDescribe extends OmekaPluginService {
             throws Throwable {
         long id = args.longValue("id");
         Tag tag = omekaClient.getTag(id);
-        OmekaXmlUtils.saveTagXml(tag, w);
+        OmekaXmlUtils.saveTagXml(tag, w, true);
 
     }
 

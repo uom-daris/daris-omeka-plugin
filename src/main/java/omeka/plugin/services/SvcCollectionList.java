@@ -47,8 +47,8 @@ public class SvcCollectionList extends OmekaEntityListPluginService<Collection> 
     }
 
     @Override
-    protected void describeEntity(Collection collection, XmlWriter w) throws Throwable {
-        OmekaXmlUtils.saveCollectionXml(collection, w);
+    protected void describeEntity(Collection collection, XmlWriter w, boolean detail) throws Throwable {
+        OmekaXmlUtils.saveCollectionXml(collection, w, detail);
     }
 
     @Override

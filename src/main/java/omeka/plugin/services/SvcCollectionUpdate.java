@@ -23,7 +23,7 @@ public class SvcCollectionUpdate extends OmekaPluginService {
         long id = args.longValue("id");
         CollectionBuilder cb = SvcCollectionCreate.parse(args);
         Collection c = omekaClient.updateCollection(id, cb);
-        OmekaXmlUtils.saveCollectionXml(c, w);
+        OmekaXmlUtils.saveCollectionXml(c, w, true);
     }
 
     @Override

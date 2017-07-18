@@ -3,6 +3,7 @@ package omeka.plugin.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import arc.mf.plugin.dtype.BooleanType;
 import arc.mf.plugin.dtype.IntegerType;
 import arc.mf.plugin.dtype.LongType;
 import arc.xml.XmlDoc.Element;
@@ -19,6 +20,8 @@ public abstract class OmekaEntityListPluginService<T extends Entity> extends Ome
                 "Absolute cursor position. Starts from 1. Defaults to 1.", 0, 1));
         defn.add(new Interface.Element("size", IntegerType.POSITIVE_ONE,
                 "Number of results to return. Defaults to 100.", 0, 1));
+        defn.add(new Interface.Element("detail", BooleanType.DEFAULT,
+                "Include details about the entity. Defaults to true."));
 
     }
 
@@ -29,6 +32,7 @@ public abstract class OmekaEntityListPluginService<T extends Entity> extends Ome
         int pageSize = args.intValue("size", 100);
         long pageIndex = (idx - 1) / pageSize + 1;
         int remainder = (int) ((idx - 1) % pageSize);
+        boolean detail = args.booleanValue("detail", true);
 
         ResultSet<T> rs1 = listEntities(omekaClient, pageIndex, pageSize, args);
         long total = rs1.totalNumberOfResults();
@@ -50,17 +54,17 @@ public abstract class OmekaEntityListPluginService<T extends Entity> extends Ome
                 }
             }
         }
-        describeEntities(idx, entities, total, w);
+        describeEntities(idx, entities, total, w, detail);
 
     }
 
     protected abstract ResultSet<T> listEntities(OmekaClient omekaClient, long pageIndex, int pageSize, Element args)
             throws Throwable;
 
-    protected void describeEntities(long idx, List<T> entities, long total, XmlWriter w) throws Throwable {
+    protected void describeEntities(long idx, List<T> entities, long total, XmlWriter w, boolean detail) throws Throwable {
         if (entities != null) {
             for (T entity : entities) {
-                describeEntity(entity, w);
+                describeEntity(entity, w, detail);
             }
         }
         w.push("cursor");
@@ -81,7 +85,7 @@ public abstract class OmekaEntityListPluginService<T extends Entity> extends Ome
         w.pop();
     }
 
-    protected abstract void describeEntity(T entity, XmlWriter w) throws Throwable;
+    protected abstract void describeEntity(T entity, XmlWriter w, boolean detail) throws Throwable;
 
     @Override
     public Access access() {

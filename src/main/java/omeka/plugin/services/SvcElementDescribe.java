@@ -20,7 +20,7 @@ public class SvcElementDescribe extends OmekaPluginService {
             throws Throwable {
         long id = args.longValue("id");
         Element e = omekaClient.getElement(id);
-        OmekaXmlUtils.saveElementXml(e, w);
+        OmekaXmlUtils.saveElementXml(e, w, true);
     }
 
 

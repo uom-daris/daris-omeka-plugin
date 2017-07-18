@@ -50,7 +50,7 @@ public class SvcElementCreate extends OmekaPluginService {
             throws Throwable {
         ElementBuilder eb = parse(args);
         Element e = omekaClient.createElement(eb);
-        OmekaXmlUtils.saveElementXml(e, w);
+        OmekaXmlUtils.saveElementXml(e, w, true);
     }
 
     @Override

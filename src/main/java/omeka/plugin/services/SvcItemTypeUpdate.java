@@ -23,7 +23,7 @@ public class SvcItemTypeUpdate extends OmekaPluginService {
         long id = args.longValue("id");
         ItemTypeBuilder itb = SvcItemTypeCreate.parse(args);
         ItemType it = omekaClient.updateItemType(id, itb);
-        OmekaXmlUtils.saveItemTypeXml(it, w);
+        OmekaXmlUtils.saveItemTypeXml(it, w, true);
     }
 
     @Override

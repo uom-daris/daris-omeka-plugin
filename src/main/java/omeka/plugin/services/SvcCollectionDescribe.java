@@ -20,7 +20,7 @@ public class SvcCollectionDescribe extends OmekaPluginService {
             throws Throwable {
         long id = args.longValue("id");
         Collection collection = omekaClient.getCollection(id);
-        OmekaXmlUtils.saveCollectionXml(collection, w);
+        OmekaXmlUtils.saveCollectionXml(collection, w, true);
     }
 
 

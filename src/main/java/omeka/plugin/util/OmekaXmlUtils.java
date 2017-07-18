@@ -25,26 +25,26 @@ import io.github.xtman.util.StringUtils;
 
 public class OmekaXmlUtils {
 
-    public static <T extends Entity> void saveXml(T entity, XmlWriter w) throws Throwable {
+    public static <T extends Entity> void saveXml(T entity, XmlWriter w, boolean detail) throws Throwable {
         if (entity instanceof EntityBase) {
             if (entity instanceof EntityInfo) {
                 if (entity instanceof Tag) {
-                    saveTagXml((Tag) entity, w);
+                    saveTagXml((Tag) entity, w, detail);
                 } else {
                     saveEntityInfoXml((EntityInfo) entity, w);
                 }
             } else if (entity instanceof Collection) {
-                saveCollectionXml((Collection) entity, w);
+                saveCollectionXml((Collection) entity, w, detail);
             } else if (entity instanceof Element) {
-                saveElementXml((Element) entity, w);
+                saveElementXml((Element) entity, w, detail);
             } else if (entity instanceof ElementSet) {
-                saveElementSetXml((ElementSet) entity, w);
+                saveElementSetXml((ElementSet) entity, w, detail);
             } else if (entity instanceof File) {
-                saveFileXml((File) entity, w);
+                saveFileXml((File) entity, w, detail);
             } else if (entity instanceof Item) {
-                saveItemXml((Item) entity, w);
+                saveItemXml((Item) entity, w, detail);
             } else if (entity instanceof ItemType) {
-                saveItemTypeXml((ItemType) entity, w);
+                saveItemTypeXml((ItemType) entity, w, detail);
             } else if (entity instanceof User) {
                 saveUserXml((User) entity, w);
             }
@@ -57,65 +57,87 @@ public class OmekaXmlUtils {
         }
     }
 
-    public static void saveCollectionXml(Collection c, XmlWriter w) throws Throwable {
-        w.push("collection", new String[] { "id", Long.toString(c.id()) });
-        saveEntityBaseXml(c, w);
-        w.add("public", c.isPublic());
-        w.add("featured", c.isFeatured());
-        if (c.added() != null) {
-            w.add("added", OmekaDateUtils.formatDate(c.added()));
-        }
-        if (c.modified() != null) {
-            w.add("modified", OmekaDateUtils.formatDate(c.modified()));
-        }
-        if (c.owner() != null) {
-            w.push("owner");
-            saveEntityInfoXml(c.owner(), w);
-            w.pop();
-        }
-        if (c.items() != null) {
-            w.push("items");
-            saveEntitySetInfoXml(c.items(), w);
-            w.pop();
-        }
-        List<ElementText> ets = c.elementTexts();
-        if (ets != null && !ets.isEmpty()) {
-            w.push("element_texts");
-            for (ElementText et : ets) {
-                saveElementTextXml(et, w);
+    public static void saveCollectionXml(Collection c, XmlWriter w, boolean detail) throws Throwable {
+        if (detail) {
+            w.push("collection", new String[] { "id", Long.toString(c.id()) });
+            saveEntityBaseXml(c, w);
+            w.add("public", c.isPublic());
+            w.add("featured", c.isFeatured());
+            if (c.added() != null) {
+                w.add("added", OmekaDateUtils.formatDate(c.added()));
+            }
+            if (c.modified() != null) {
+                w.add("modified", OmekaDateUtils.formatDate(c.modified()));
+            }
+            if (c.owner() != null) {
+                w.push("owner");
+                saveEntityInfoXml(c.owner(), w);
+                w.pop();
+            }
+            if (c.items() != null) {
+                w.push("items");
+                saveEntitySetInfoXml(c.items(), w);
+                w.pop();
+            }
+            List<ElementText> ets = c.elementTexts();
+            if (ets != null && !ets.isEmpty()) {
+                w.push("element_texts");
+                for (ElementText et : ets) {
+                    saveElementTextXml(et, w);
+                }
+                w.pop();
             }
             w.pop();
+        } else {
+            w.add("collection", new String[] { "id", Long.toString(c.id()) });
         }
-        w.pop();
     }
 
-    public static void saveElementXml(Element e, XmlWriter w) throws Throwable {
-        w.push("element", new String[] { "id", Long.toString(e.id()) });
-        saveEntityBaseXml(e, w);
-        if (e.order() != null) {
-            w.add("order", e.order());
-        }
-        if (e.name() != null) {
-            w.add("name", e.name());
-        }
-        if (e.description() != null) {
-            w.add("description", e.description());
-        }
-        if (e.comment() != null) {
-            w.add("comment", e.comment());
-        }
-        if (e.elementSet() != null) {
-            w.push("element_set");
-            saveEntityInfoXml(e.elementSet(), w);
+    public static void saveElementXml(Element e, XmlWriter w, boolean detail) throws Throwable {
+        if (detail) {
+            w.push("element", new String[] { "id", Long.toString(e.id()) });
+            saveEntityBaseXml(e, w);
+            if (e.order() != null) {
+                w.add("order", e.order());
+            }
+            if (e.name() != null) {
+                w.add("name", e.name());
+            }
+            if (e.description() != null) {
+                w.add("description", e.description());
+            }
+            if (e.comment() != null) {
+                w.add("comment", e.comment());
+            }
+            if (e.elementSet() != null) {
+                w.push("element_set");
+                saveEntityInfoXml(e.elementSet(), w);
+                w.pop();
+            }
             w.pop();
+        } else {
+            String[] attrs = new String[] { "id", Long.toString(e.id()), "element_set",
+                    Long.toString(e.elementSet().id()) };
+            if (e.name() != null) {
+                w.add("element", attrs, e.name());
+            } else {
+                w.add("element", attrs);
+            }
         }
-        w.pop();
     }
 
-    public static void saveTagXml(Tag t, XmlWriter w) throws Throwable {
-        w.push("tag", new String[] { "id", Long.toString(t.id()) });
-        saveEntityInfoXml(t, w);
-        w.pop();
+    public static void saveTagXml(Tag t, XmlWriter w, boolean detail) throws Throwable {
+        if (detail) {
+            w.push("tag", new String[] { "id", Long.toString(t.id()) });
+            saveEntityInfoXml(t, w);
+            w.pop();
+        } else {
+            if (t.name() != null) {
+                w.add("tag", new String[] { "id", Long.toString(t.id()) }, t.name());
+            } else {
+                w.add("tag", new String[] { "id", Long.toString(t.id()) });
+            }
+        }
     }
 
     private static void saveEntityInfoXml(EntityInfo e, XmlWriter w) throws Throwable {
@@ -237,158 +259,206 @@ public class OmekaXmlUtils {
         w.pop();
     }
 
-    public static void saveElementSetXml(ElementSet es, XmlWriter w) throws Throwable {
-        w.push("element_set", new String[] { "id", Long.toString(es.id()) });
-        saveEntityBaseXml(es, w);
-        if (es.name() != null) {
-            w.add("name", es.name());
-        }
-        if (es.description() != null) {
-            w.add("description", es.name());
-        }
-        if (es.recordType() != null) {
-            w.add("record_type", es.recordType());
-        }
-        if (es.elements() != null) {
-            w.push("elements");
-            saveEntitySetInfoXml(es.elements(), w);
-            w.pop();
-        }
-        w.pop();
-    }
-
-    public static void saveItemXml(Item i, XmlWriter w) throws Throwable {
-        w.push("item", new String[] { "id", Long.toString(i.id()) });
-        saveEntityBaseXml(i, w);
-        w.add("public", i.isPublic());
-        w.add("featured", i.isFeatured());
-        if (i.added() != null) {
-            w.add("added", OmekaDateUtils.formatDate(i.added()));
-        }
-        if (i.modified() != null) {
-            w.add("modified", OmekaDateUtils.formatDate(i.modified()));
-        }
-        if (i.itemType() != null) {
-            w.push("item_type");
-            saveEntityInfoXml(i.itemType(), w);
-            w.pop();
-        }
-        if (i.collection() != null) {
-            w.push("collection");
-            saveEntityInfoXml(i.collection(), w);
-            w.pop();
-        }
-        if (i.owner() != null) {
-            w.push("owner");
-            saveEntityInfoXml(i.owner(), w);
-            w.pop();
-        }
-        if (i.files() != null) {
-            w.push("files");
-            saveEntitySetInfoXml(i.files(), w);
-            w.pop();
-        }
-        List<EntityInfo> tags = i.tags();
-        if (tags != null && !tags.isEmpty()) {
-            w.push("tags");
-            for (EntityInfo tag : tags) {
-                w.push("tag");
-                saveEntityInfoXml(tag, w);
+    public static void saveElementSetXml(ElementSet es, XmlWriter w, boolean detail) throws Throwable {
+        if (detail) {
+            w.push("element_set", new String[] { "id", Long.toString(es.id()) });
+            saveEntityBaseXml(es, w);
+            if (es.name() != null) {
+                w.add("name", es.name());
+            }
+            if (es.description() != null) {
+                w.add("description", es.name());
+            }
+            if (es.recordType() != null) {
+                w.add("record_type", es.recordType());
+            }
+            if (es.elements() != null) {
+                w.push("elements");
+                saveEntitySetInfoXml(es.elements(), w);
                 w.pop();
             }
             w.pop();
-        }
-        List<ElementText> ets = i.elementTexts();
-        if (ets != null && !ets.isEmpty()) {
-            w.push("element_texts");
-            for (ElementText et : ets) {
-                saveElementTextXml(et, w);
+        } else {
+            String[] attrs = new String[] { "id", Long.toString(es.id()) };
+            if (es.name() != null) {
+                w.add("element_set", attrs, es.name());
+            } else {
+                w.add("element_set", attrs);
             }
-            w.pop();
         }
-        w.pop();
     }
 
-    public static void saveItemTypeXml(ItemType it, XmlWriter w) throws Throwable {
-        w.push("item_type", new String[] { "id", Long.toString(it.id()) });
-        saveEntityBaseXml(it, w);
-        if (it.name() != null) {
-            w.add("name", it.name());
-        }
-        if (it.description() != null) {
-            w.add("description", it.description());
-        }
-        List<EntityBase> elements = it.elements();
-        if (elements != null && !elements.isEmpty()) {
-            w.push("elements");
-            for (EntityBase element : elements) {
-                w.push("element");
-                saveEntityBaseXml(element, w);
+    public static void saveItemXml(Item i, XmlWriter w, boolean detail) throws Throwable {
+        if (detail) {
+            w.push("item", new String[] { "id", Long.toString(i.id()) });
+            saveEntityBaseXml(i, w);
+            w.add("public", i.isPublic());
+            w.add("featured", i.isFeatured());
+            if (i.added() != null) {
+                w.add("added", OmekaDateUtils.formatDate(i.added()));
+            }
+            if (i.modified() != null) {
+                w.add("modified", OmekaDateUtils.formatDate(i.modified()));
+            }
+            if (i.itemType() != null) {
+                w.push("item_type");
+                saveEntityInfoXml(i.itemType(), w);
+                w.pop();
+            }
+            if (i.collection() != null) {
+                w.push("collection");
+                saveEntityInfoXml(i.collection(), w);
+                w.pop();
+            }
+            if (i.owner() != null) {
+                w.push("owner");
+                saveEntityInfoXml(i.owner(), w);
+                w.pop();
+            }
+            if (i.files() != null) {
+                w.push("files");
+                saveEntitySetInfoXml(i.files(), w);
+                w.pop();
+            }
+            List<EntityInfo> tags = i.tags();
+            if (tags != null && !tags.isEmpty()) {
+                w.push("tags");
+                for (EntityInfo tag : tags) {
+                    w.push("tag");
+                    saveEntityInfoXml(tag, w);
+                    w.pop();
+                }
+                w.pop();
+            }
+            List<ElementText> ets = i.elementTexts();
+            if (ets != null && !ets.isEmpty()) {
+                w.push("element_texts");
+                for (ElementText et : ets) {
+                    saveElementTextXml(et, w);
+                }
                 w.pop();
             }
             w.pop();
-        }
-        if (it.items() != null) {
-            w.push("items");
-            saveEntitySetInfoXml(it.items(), w);
-            w.pop();
-        }
-        w.pop();
-    }
-
-    public static void saveFileXml(File f, XmlWriter w) throws Throwable {
-        w.push("file", new String[] { "id", Long.toString(f.id()) });
-        saveEntityBaseXml(f, w);
-        saveFileUrlsXml(f.fileUrls(), w);
-        if (f.added() != null) {
-            w.add("added", OmekaDateUtils.formatDate(f.added()));
-        }
-        if (f.modified() != null) {
-            w.add("modified", OmekaDateUtils.formatDate(f.modified()));
-        }
-        if (f.filename() != null) {
-            w.add("filename", f.filename());
-        }
-        if (f.authentication() != null) {
-            w.add("authentication", f.authentication());
-        }
-        w.add("has_derivative_image", f.hasDerivativeImage());
-        if (f.mimeType() != null) {
-            w.add("mime_type", f.mimeType());
-        }
-        if (f.order() != null) {
-            w.add("order", f.order());
-        }
-        if (f.originalFilename() != null) {
-            w.add("original_filename", f.originalFilename());
-        }
-        w.add("size", f.size());
-        w.add("stored", f.stored());
-        if (f.typeOS() != null) {
-            w.add("type_os", f.typeOS());
-        }
-        if (f.metadata() != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("<metadata>");
-            sb.append(JSON2XML.toString(f.metadata()));
-            sb.append("</metadata>");
-            XmlDoc.Element me = new XmlDoc().parse(sb.toString());
-            w.add(me);
-        }
-        if (f.item() != null) {
-            w.push("item");
-            saveEntityInfoXml(f.item(), w);
-            w.pop();
-        }
-        List<ElementText> ets = f.elementTexts();
-        if (ets != null && !ets.isEmpty()) {
-            w.push("element_texts");
-            for (ElementText et : ets) {
-                saveElementTextXml(et, w);
+        } else {
+            w.push("item",
+                    new String[] { "id", Long.toString(i.id()), "featured", Boolean.toString(i.isFeatured()), "public",
+                            Boolean.toString(i.isPublic()), "files",
+                            i.files() == null ? null : Long.toString(i.files().count()) });
+            if (i.itemType() != null) {
+                if (i.itemType().name() != null) {
+                    w.add("item_type", new String[] { "id", Long.toString(i.itemType().id()) }, i.itemType().name());
+                } else {
+                    w.add("item_type", new String[] { "id", Long.toString(i.itemType().id()) });
+                }
+            }
+            if (i.collection() != null) {
+                if (i.collection().name() != null) {
+                    w.add("collection", new String[] { "id", Long.toString(i.collection().id()) },
+                            i.collection().name());
+                } else {
+                    w.add("collection", new String[] { "id", Long.toString(i.collection().id()) });
+                }
             }
             w.pop();
         }
-        w.pop();
+    }
+
+    public static void saveItemTypeXml(ItemType it, XmlWriter w, boolean detail) throws Throwable {
+        if (detail) {
+            w.push("item_type", new String[] { "id", Long.toString(it.id()) });
+            saveEntityBaseXml(it, w);
+            if (it.name() != null) {
+                w.add("name", it.name());
+            }
+            if (it.description() != null) {
+                w.add("description", it.description());
+            }
+            List<EntityBase> elements = it.elements();
+            if (elements != null && !elements.isEmpty()) {
+                w.push("elements");
+                for (EntityBase element : elements) {
+                    w.push("element");
+                    saveEntityBaseXml(element, w);
+                    w.pop();
+                }
+                w.pop();
+            }
+            if (it.items() != null) {
+                w.push("items");
+                saveEntitySetInfoXml(it.items(), w);
+                w.pop();
+            }
+            w.pop();
+        } else {
+            String[] attrs = new String[] { "id", Long.toString(it.id()), "items",
+                    it.items() == null ? null : Long.toString(it.items().count()) };
+            if (it.name() != null) {
+                w.add("item_type", attrs, it.name());
+            } else {
+                w.add("item_type", attrs);
+            }
+        }
+    }
+
+    public static void saveFileXml(File f, XmlWriter w, boolean detail) throws Throwable {
+        if (detail) {
+            w.push("file", new String[] { "id", Long.toString(f.id()) });
+            saveEntityBaseXml(f, w);
+            saveFileUrlsXml(f.fileUrls(), w);
+            if (f.added() != null) {
+                w.add("added", OmekaDateUtils.formatDate(f.added()));
+            }
+            if (f.modified() != null) {
+                w.add("modified", OmekaDateUtils.formatDate(f.modified()));
+            }
+            if (f.filename() != null) {
+                w.add("filename", f.filename());
+            }
+            if (f.authentication() != null) {
+                w.add("authentication", f.authentication());
+            }
+            w.add("has_derivative_image", f.hasDerivativeImage());
+            if (f.mimeType() != null) {
+                w.add("mime_type", f.mimeType());
+            }
+            if (f.order() != null) {
+                w.add("order", f.order());
+            }
+            if (f.originalFilename() != null) {
+                w.add("original_filename", f.originalFilename());
+            }
+            w.add("size", f.size());
+            w.add("stored", f.stored());
+            if (f.typeOS() != null) {
+                w.add("type_os", f.typeOS());
+            }
+            if (f.metadata() != null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<metadata>");
+                sb.append(JSON2XML.toString(f.metadata()));
+                sb.append("</metadata>");
+                XmlDoc.Element me = new XmlDoc().parse(sb.toString());
+                w.add(me);
+            }
+            if (f.item() != null) {
+                w.push("item");
+                saveEntityInfoXml(f.item(), w);
+                w.pop();
+            }
+            List<ElementText> ets = f.elementTexts();
+            if (ets != null && !ets.isEmpty()) {
+                w.push("element_texts");
+                for (ElementText et : ets) {
+                    saveElementTextXml(et, w);
+                }
+                w.pop();
+            }
+            w.pop();
+        } else {
+            String[] attrs = new String[] { "id", Long.toString(f.id()), "item", Long.toString(f.item().id()), "mime",
+                    f.mimeType() };
+            w.add("file", attrs, f.originalFilename());
+        }
     }
 
     private static void saveFileUrlsXml(File.FileUrls urls, XmlWriter w) throws Throwable {

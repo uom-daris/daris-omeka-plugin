@@ -37,7 +37,7 @@ public class SvcElementSetCreate extends OmekaPluginService {
             throws Throwable {
         ElementSetBuilder esb = parse(args);
         ElementSet es = omekaClient.createElementSet(esb);
-        OmekaXmlUtils.saveElementSetXml(es, w);
+        OmekaXmlUtils.saveElementSetXml(es, w, true);
     }
 
     @Override

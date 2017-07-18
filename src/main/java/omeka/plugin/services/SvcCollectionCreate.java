@@ -56,7 +56,7 @@ public class SvcCollectionCreate extends OmekaPluginService {
             throws Throwable {
         CollectionBuilder cb = parse(args);
         Collection c = omekaClient.createCollection(cb);
-        OmekaXmlUtils.saveCollectionXml(c, w);
+        OmekaXmlUtils.saveCollectionXml(c, w, true);
     }
 
     @Override

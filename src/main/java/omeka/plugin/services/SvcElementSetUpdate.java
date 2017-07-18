@@ -23,7 +23,7 @@ public class SvcElementSetUpdate extends OmekaPluginService {
         long id = args.longValue("id");
         ElementSetBuilder esb = SvcElementSetCreate.parse(args);
         ElementSet es = omekaClient.updateElementSet(id, esb);
-        OmekaXmlUtils.saveElementSetXml(es, w);
+        OmekaXmlUtils.saveElementSetXml(es, w, true);
     }
 
     @Override

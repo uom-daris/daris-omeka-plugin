@@ -55,8 +55,8 @@ public class SvcFileList extends OmekaEntityListPluginService<File> {
     }
 
     @Override
-    protected void describeEntity(File file, XmlWriter w) throws Throwable {
-        OmekaXmlUtils.saveFileXml(file, w);
+    protected void describeEntity(File file, XmlWriter w, boolean detail) throws Throwable {
+        OmekaXmlUtils.saveFileXml(file, w, detail);
     }
 
     @Override

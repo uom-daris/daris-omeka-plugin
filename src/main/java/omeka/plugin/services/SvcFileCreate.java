@@ -93,7 +93,7 @@ public class SvcFileCreate extends OmekaPluginService {
             csize = args.longValue("csize");
         }
         File f = omekaClient.createFile(fb, filename, cin, csize, ctype);
-        OmekaXmlUtils.saveFileXml(f, w);
+        OmekaXmlUtils.saveFileXml(f, w, true);
     }
 
     @Override

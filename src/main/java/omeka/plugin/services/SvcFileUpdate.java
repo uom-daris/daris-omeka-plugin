@@ -61,7 +61,7 @@ public class SvcFileUpdate extends OmekaPluginService {
         long id = args.longValue("id");
         FileBuilder fb = parse(args);
         File f = omekaClient.updateFile(id, fb);
-        OmekaXmlUtils.saveFileXml(f, w);
+        OmekaXmlUtils.saveFileXml(f, w, true);
     }
 
 

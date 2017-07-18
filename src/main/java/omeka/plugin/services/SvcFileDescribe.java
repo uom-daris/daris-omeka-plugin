@@ -20,7 +20,7 @@ public class SvcFileDescribe extends OmekaPluginService {
             throws Throwable {
         long id = args.longValue("id");
         File file = omekaClient.getFile(id);
-        OmekaXmlUtils.saveFileXml(file, w);
+        OmekaXmlUtils.saveFileXml(file, w, true);
     }
 
     @Override

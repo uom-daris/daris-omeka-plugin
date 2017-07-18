@@ -69,7 +69,7 @@ public class SvcItemCreate extends OmekaPluginService {
             throws Throwable {
         ItemBuilder ib = parse(args);
         Item i = omekaClient.createItem(ib);
-        OmekaXmlUtils.saveItemXml(i, w);
+        OmekaXmlUtils.saveItemXml(i, w, true);
     }
 
     @Override

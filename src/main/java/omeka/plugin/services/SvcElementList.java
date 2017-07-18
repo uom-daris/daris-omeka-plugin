@@ -37,8 +37,8 @@ public class SvcElementList extends OmekaEntityListPluginService<Element> {
     }
 
     @Override
-    protected void describeEntity(Element element, XmlWriter w) throws Throwable {
-        OmekaXmlUtils.saveElementXml(element, w);
+    protected void describeEntity(Element element, XmlWriter w, boolean detail) throws Throwable {
+        OmekaXmlUtils.saveElementXml(element, w, detail);
     }
 
     @Override

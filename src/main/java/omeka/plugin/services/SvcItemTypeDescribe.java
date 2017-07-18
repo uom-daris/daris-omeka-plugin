@@ -20,7 +20,7 @@ public class SvcItemTypeDescribe extends OmekaPluginService {
             throws Throwable {
         long id = args.longValue("id");
         ItemType itemType = omekaClient.getItemType(id);
-        OmekaXmlUtils.saveItemTypeXml(itemType, w);
+        OmekaXmlUtils.saveItemTypeXml(itemType, w, true);
     }
 
 
