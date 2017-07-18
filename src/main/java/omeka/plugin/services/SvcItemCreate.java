@@ -107,7 +107,7 @@ public class SvcItemCreate extends OmekaPluginService {
                 StringBuilder err = new StringBuilder(
                         "Ambiguous element specification. Multiple '" + elementName + "' elements are found.");
                 if (elementSetId == null) {
-                    err.append(" Please specify element-text/element/name/@element-set.");
+                    err.append(" Please specify element-text/element/name/@element_set.");
                 } else {
                     err.append(" Please specify element-text/element/id instead.");
                 }
