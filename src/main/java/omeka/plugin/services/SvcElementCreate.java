@@ -18,35 +18,35 @@ public class SvcElementCreate extends OmekaPluginService {
     }
 
     static void addToDefinition(Interface defn) {
-        defn.add(new Interface.Element("order", LongType.POSITIVE_ONE, "order", 1, 1));
+        defn.add(new Interface.Element("order", LongType.POSITIVE_ONE, "order", 0, 1));
         defn.add(new Interface.Element("name", StringType.DEFAULT, "name", 1, 1));
         defn.add(new Interface.Element("description", StringType.DEFAULT, "description", 0, 1));
         defn.add(new Interface.Element("comment", StringType.DEFAULT, "comment", 0, 1));
-        defn.add(new Interface.Element("element_set", LongType.POSITIVE_ONE, "element set id", 0, 1));
+        defn.add(new Interface.Element("element_set", LongType.POSITIVE_ONE, "element set id", 1, 1));
     }
 
     static ElementBuilder parse(XmlDoc.Element args) throws Throwable {
         ElementBuilder eb = new ElementBuilder();
-        if(args.elementExists("order")){
+        if (args.elementExists("order")) {
             eb.setOrder(args.longValue("order"));
         }
-        if(args.elementExists("name")){
+        if (args.elementExists("name")) {
             eb.setName(args.value("name"));
         }
-        if(args.elementExists("description")){
+        if (args.elementExists("description")) {
             eb.setDescription(args.value("description"));
         }
-        if(args.elementExists("comment")){
+        if (args.elementExists("comment")) {
             eb.setComment(args.value("comment"));
         }
-        if(args.elementExists("element_set")){
+        if (args.elementExists("element_set")) {
             eb.setElementSetId(args.longValue("element_set"));
         }
         return eb;
     }
 
     @Override
-    protected void execute(OmekaClient omekaClient,XmlDoc. Element args, Inputs inputs, Outputs outputs, XmlWriter w)
+    protected void execute(OmekaClient omekaClient, XmlDoc.Element args, Inputs inputs, Outputs outputs, XmlWriter w)
             throws Throwable {
         ElementBuilder eb = parse(args);
         Element e = omekaClient.createElement(eb);
