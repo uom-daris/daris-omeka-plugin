@@ -13,6 +13,7 @@ import io.github.xtman.omeka.client.OmekaClient;
 import io.github.xtman.omeka.client.command.ResultSet;
 import io.github.xtman.omeka.model.Element;
 import io.github.xtman.omeka.model.Item;
+import io.github.xtman.omeka.model.ItemType;
 import io.github.xtman.omeka.model.builder.ItemBuilder;
 import omeka.plugin.util.OmekaXmlUtils;
 
@@ -25,20 +26,26 @@ public class SvcItemCreate extends OmekaPluginService {
     }
 
     static void addToDefinition(Interface defn) {
-        defn.add(new Interface.Element("item_type", LongType.POSITIVE_ONE, "Item type id.", 0, 1));
+        Interface.Element it = new Interface.Element("item_type", XmlDocType.DEFAULT, "Item type.", 0, 1);
+        it.add(new Interface.Element("id", LongType.POSITIVE_ONE,
+                "Item type id. Either id or name of the item_type must be specified.", 0, 1));
+        it.add(new Interface.Element("name", StringType.DEFAULT,
+                "Item type name. Either id or name of the item_type must be specified.", 0, 1));
+        defn.add(it);
+
         defn.add(new Interface.Element("collection", LongType.POSITIVE_ONE, "Collection id.", 0, 1));
         defn.add(new Interface.Element("public", BooleanType.DEFAULT, "Is public? Defaults to true.", 0, 1));
         defn.add(new Interface.Element("featured", BooleanType.DEFAULT, "Is featured? Defaults to false.", 0, 1));
         defn.add(new Interface.Element("tag", StringType.DEFAULT, "Tag.", 0, Integer.MAX_VALUE));
         Interface.Element et = new Interface.Element("element_text", XmlDocType.DEFAULT, "Element text.", 0,
                 Integer.MAX_VALUE);
-        et.add(new Interface.Element("html", BooleanType.DEFAULT, "Is html? ", 0, 1));
+        et.add(new Interface.Element("html", BooleanType.DEFAULT, "Is html? Defaults to true.", 0, 1));
         et.add(new Interface.Element("text", StringType.DEFAULT, "text.", 1, 1));
 
-        Interface.Element e = new Interface.Element("element", XmlDocType.DEFAULT, "element.", 1, 1);
-        e.add(new Interface.Element("id", LongType.POSITIVE_ONE, "element id", 0, 1));
-        Interface.Element en = new Interface.Element("name", StringType.DEFAULT, "element name", 0, 1);
-        en.add(new Interface.Attribute("element_set", LongType.POSITIVE_ONE, "element set id", 0));
+        Interface.Element e = new Interface.Element("element", XmlDocType.DEFAULT, "Element.", 1, 1);
+        e.add(new Interface.Element("id", LongType.POSITIVE_ONE, "Element id", 0, 1));
+        Interface.Element en = new Interface.Element("name", StringType.DEFAULT, "Element name", 0, 1);
+        en.add(new Interface.Attribute("element_set", LongType.POSITIVE_ONE, "Element set id", 0));
         e.add(en);
         et.add(e);
 
@@ -48,7 +55,17 @@ public class SvcItemCreate extends OmekaPluginService {
     static ItemBuilder parse(XmlDoc.Element args, OmekaClient omekaClient) throws Throwable {
         ItemBuilder ib = new ItemBuilder();
         if (args.elementExists("item_type")) {
-            ib.setItemType(args.longValue("item_type"));
+            long itemTypeId;
+            if (args.elementExists("item_type/id")) {
+                itemTypeId = args.longValue("item_type/id");
+            } else {
+                if (!args.elementExists("item_type/name")) {
+                    throw new IllegalArgumentException("Missing item_type/id or item_type/name.");
+                }
+                String itemTypeName = args.value("item_type/name");
+                itemTypeId = findItemTypeByName(omekaClient, itemTypeName);
+            }
+            ib.setItemType(itemTypeId);
         }
         if (args.elementExists("collection")) {
             ib.setCollection(args.longValue("collection"));
@@ -65,7 +82,7 @@ public class SvcItemCreate extends OmekaPluginService {
         if (ets != null) {
             ResultSet<Element> elements = null;
             for (XmlDoc.Element et : ets) {
-                boolean html = et.booleanValue("html", false);
+                boolean html = et.booleanValue("html", true);
                 String text = et.value("text");
                 long elementId;
                 if (et.elementExists("element/id")) {
@@ -73,6 +90,10 @@ public class SvcItemCreate extends OmekaPluginService {
 
                 } else {
                     String elementName = et.value("element/name");
+                    if (elementName == null) {
+                        throw new IllegalArgumentException(
+                                "Missing element_text/element/id or element_text/element/name.");
+                    }
                     Long elementSetId = et.longValue("element/name/@element_set", null);
                     if (elements == null) {
                         elements = omekaClient.listElements(null);
@@ -86,6 +107,19 @@ public class SvcItemCreate extends OmekaPluginService {
             }
         }
         return ib;
+    }
+
+    private static long findItemTypeByName(OmekaClient omekaClient, String itemTypeName) throws Throwable {
+        ResultSet<ItemType> itemTypes = omekaClient.listItemTypes(null);
+        if (itemTypes != null && !itemTypes.isEmpty()) {
+            List<ItemType> its = itemTypes.entities();
+            for (ItemType it : its) {
+                if (itemTypeName.equals(it.name())) {
+                    return it.id();
+                }
+            }
+        }
+        throw new IllegalArgumentException("No item_type '" + itemTypeName + "' is found.");
     }
 
     private static long findElementByName(ResultSet<Element> elements, String elementName, Long elementSetId)
@@ -107,9 +141,9 @@ public class SvcItemCreate extends OmekaPluginService {
                 StringBuilder err = new StringBuilder(
                         "Ambiguous element specification. Multiple '" + elementName + "' elements are found.");
                 if (elementSetId == null) {
-                    err.append(" Please specify element-text/element/name/@element_set.");
+                    err.append(" Please specify element_text/element/name/@element_set.");
                 } else {
-                    err.append(" Please specify element-text/element/id instead.");
+                    err.append(" Please specify element_text/element/id instead.");
                 }
                 throw new IllegalArgumentException(err.toString());
             } else {
