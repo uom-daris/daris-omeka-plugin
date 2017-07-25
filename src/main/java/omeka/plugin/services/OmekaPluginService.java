@@ -1,7 +1,7 @@
 package omeka.plugin.services;
 
 import arc.mf.plugin.PluginService;
-import arc.mf.plugin.dtype.StringType;
+import arc.mf.plugin.dtype.PasswordType;
 import arc.mf.plugin.dtype.UrlType;
 import arc.xml.XmlDoc.Element;
 import arc.xml.XmlWriter;
@@ -15,7 +15,7 @@ public abstract class OmekaPluginService extends PluginService {
     protected OmekaPluginService() {
         defn = new Interface();
         defn.add(new Interface.Element("endpoint", UrlType.DEFAULT, "OMEKA site API endpoint address.", 1, 1));
-        defn.add(new Interface.Element("api-key", StringType.DEFAULT, "OMEKA user's API key.", 0, 1));
+        defn.add(new Interface.Element("api-key", PasswordType.DEFAULT, "OMEKA user's API key.", 0, 1));
     }
 
     protected boolean requiresApiKey() {
