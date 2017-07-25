@@ -35,4 +35,24 @@ public class HttpResponse {
         return _contentStream;
     }
 
+    public String contentType() {
+        if (_headerFields != null) {
+            List<String> vs = _headerFields.get("Content-Type");
+            if (vs != null && !vs.isEmpty()) {
+                return vs.get(0);
+            }
+        }
+        return null;
+    }
+
+    public String contentEncoding() {
+        if (_headerFields != null) {
+            List<String> vs = _headerFields.get("Content-Encoding");
+            if (vs != null && !vs.isEmpty()) {
+                return vs.get(0);
+            }
+        }
+        return null;
+    }
+
 }

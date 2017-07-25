@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import io.github.xtman.http.client.HttpRequest;
 import io.github.xtman.http.client.HttpResponse;
@@ -52,12 +51,12 @@ public abstract class GetEntitySetCommand<T extends Entity> extends GetCommand<R
     public ResultSet<T> handleResponse(HttpRequest request, HttpResponse response) throws Throwable {
         int responseCode = response.responseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
-            JSONArray responseJA = JSONUtils.parseJsonArray(response.responseContentStream());
+            JSONArray responseJA = JSONUtils.parseJsonArray(response.responseContentStream(),
+                    response.contentEncoding());
             List<T> results = instantiate(responseJA);
             return new ResultSet<T>(results, response.responseHeaderFields());
         } else {
-            JSONObject responseJO = JSONUtils.parseJsonObject(response.responseContentStream());
-            throw HttpException.create(JSONUtils.getStringValue(responseJO, "message"), response, request);
+            throw HttpException.create(request, response);
         }
     }
 

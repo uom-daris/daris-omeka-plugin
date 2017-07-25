@@ -40,7 +40,7 @@ public class DeleteCommand extends OmekaCommandBase<Void> {
         if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
             return null;
         } else {
-            throw HttpException.create(response, request);
+            throw HttpException.create(request, response);
         }
     }
 

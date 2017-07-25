@@ -25,11 +25,12 @@ public abstract class GetEntityCommand<T extends Entity> extends GetCommand<T> {
     @Override
     public T handleResponse(HttpRequest request, HttpResponse response) throws Throwable {
         int responseCode = response.responseCode();
-        JSONObject responseJO = JSONUtils.parseJsonObject(response.responseContentStream());
         if (responseCode == HttpURLConnection.HTTP_OK) {
-            return instantiate(responseJO);
+            JSONObject jo = JSONUtils.parseJsonObject(response.responseContentStream(),
+                    response.contentEncoding());
+            return instantiate(jo);
         } else {
-            throw HttpException.create(JSONUtils.getStringValue(responseJO, "message"), response, request);
+            throw HttpException.create(request, response);
         }
     }
 

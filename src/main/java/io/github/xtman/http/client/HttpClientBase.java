@@ -57,8 +57,9 @@ public class HttpClientBase implements HttpClient {
             }
             try {
                 if (responseHandler != null) {
-                    return responseHandler.handleResponse(request,
-                            new HttpResponse(responseCode, responseMessage, responseHeaders, responseInputStream));
+                    HttpResponse response = new HttpResponse(responseCode, responseMessage, responseHeaders,
+                            responseInputStream);
+                    return responseHandler.handleResponse(request, response);
                 } else {
                     return null;
                 }
