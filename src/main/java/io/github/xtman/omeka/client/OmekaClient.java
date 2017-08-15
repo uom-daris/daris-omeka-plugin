@@ -1,7 +1,5 @@
 package io.github.xtman.omeka.client;
 
-import java.io.InputStream;
-
 import io.github.xtman.http.client.HttpClient;
 import io.github.xtman.omeka.client.command.ResultSet;
 import io.github.xtman.omeka.client.command.collection.GetCollectionsCommand;
@@ -115,7 +113,7 @@ public interface OmekaClient extends HttpClient {
     /*
      * file
      */
-    File createFile(FileBuilder file, String fileName, InputStream in, long length, String mimeType) throws Throwable;
+    File createFile(FileBuilder file) throws Throwable;
 
     File getFile(long id) throws Throwable;
 

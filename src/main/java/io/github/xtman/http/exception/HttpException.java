@@ -1,6 +1,7 @@
 package io.github.xtman.http.exception;
 
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 
 import org.json.JSONObject;
 
@@ -13,9 +14,20 @@ public class HttpException extends Exception {
 
     private static final long serialVersionUID = -2853345446644146536L;
 
+    private int _statusCode;
+
     public HttpException(int responseCode, String responseMessage, String requestUri, String requestMethod,
             Throwable cause) {
         super(messageFor(responseCode, responseMessage, requestUri, requestMethod), cause);
+        _statusCode = responseCode;
+    }
+
+    public int statusCode() {
+        return _statusCode;
+    }
+
+    public boolean isNotFoundError() {
+        return HttpURLConnection.HTTP_NOT_FOUND == _statusCode;
     }
 
     private static String messageFor(int responseCode, String responseMessage, String requestUri,
@@ -73,7 +85,8 @@ public class HttpException extends Exception {
     public static HttpException create(HttpRequest request, HttpResponse response) throws Throwable {
         String contentType = response.contentType();
         String contentEncoding = response.contentEncoding();
-        String content = StreamUtils.readString(response.responseContentStream(), contentEncoding);
+        String content = response.responseContentStream() == null ? null
+                : StreamUtils.readString(response.responseContentStream(), contentEncoding);
         String message = null;
         if (content != null) {
             if ("application/json".equals(contentType)) {

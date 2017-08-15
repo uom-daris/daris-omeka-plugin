@@ -94,7 +94,8 @@ public class Item extends EntityBase {
         _modified = OmekaDateUtils.getDate(jo, "modified");
         _itemType = (jo.has("item_type") && !jo.isNull("item_type")) ? new EntityInfo(jo.getJSONObject("item_type"))
                 : null;
-        _collection = (jo.has("collection") && !jo.isNull("collection")) ? new EntityInfo(jo.getJSONObject("collection")):null;
+        _collection = (jo.has("collection") && !jo.isNull("collection"))
+                ? new EntityInfo(jo.getJSONObject("collection")) : null;
         _owner = new EntityInfo(jo.getJSONObject("owner"));
         _files = new EntitySetInfo(jo.getJSONObject("files"));
         _tags = EntityInfo.instantiateList(jo, "tags");
@@ -124,6 +125,14 @@ public class Item extends EntityBase {
 
     public EntityInfo collection() {
         return _collection;
+    }
+
+    public Long collectionId() {
+        if (_collection == null) {
+            return null;
+        } else {
+            return _collection.id();
+        }
     }
 
     public EntityInfo owner() {

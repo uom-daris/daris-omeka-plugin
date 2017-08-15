@@ -1,7 +1,5 @@
 package io.github.xtman.omeka.client;
 
-import java.io.InputStream;
-
 import io.github.xtman.http.client.HttpClientBase;
 import io.github.xtman.omeka.client.command.ResultSet;
 import io.github.xtman.omeka.client.command.collection.DeleteCollectionCommand;
@@ -203,9 +201,9 @@ public class OmekaClientImpl extends HttpClientBase implements OmekaClient {
     }
 
     @Override
-    public File createFile(FileBuilder file, String fileName, InputStream in, long length, String mimeType)
-            throws Throwable {
-        return new PostFileCommand(this, file, fileName, in, length, mimeType).execute();
+    public File createFile(FileBuilder file) throws Throwable {
+        return new PostFileCommand(this, file, file.fileName(), file.stream(), file.length(), file.mimeType())
+                .execute();
     }
 
     @Override

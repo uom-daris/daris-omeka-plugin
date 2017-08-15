@@ -29,3 +29,5 @@ system.service.reload
 # refresh the enclosing shell
 srefresh
 
+# create/update doc types
+source doc-types.tcl
