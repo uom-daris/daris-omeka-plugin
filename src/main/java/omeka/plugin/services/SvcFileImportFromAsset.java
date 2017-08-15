@@ -71,7 +71,7 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
         }
     }
 
-    private static void importFileFromAsset(ServiceExecutor executor, OmekaClient omekaClient, String site, long itemId,
+    static void importFileFromAsset(ServiceExecutor executor, OmekaClient omekaClient, String site, long itemId,
             String assetId, XmlDoc.Element args, boolean ignoreIfExists, XmlWriter w) throws Throwable {
         XmlDoc.Element ae = AssetUtils.getAssetMeta(executor, assetId);
         assetId = ae.value("@id");
@@ -123,6 +123,8 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
 
         // create omeka file
         FileBuilder fb = SvcFileCreate.parse(omekaClient, args);
+        fb.setItemId(itemId);
+        // TODO order?
         SvcFileCreate.buildFileFromAsset(executor, fb, assetId);
         file = omekaClient.createFile(fb);
 
@@ -160,7 +162,7 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
 
     @Override
     public String description() {
-        return "Import files for the given item from the specified assets.";
+        return "Import OMEKA files from the specified assets for the given OMEKA item.";
     }
 
     @Override

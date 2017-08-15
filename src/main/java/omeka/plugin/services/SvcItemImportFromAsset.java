@@ -7,6 +7,7 @@ import java.util.Set;
 
 import arc.mf.plugin.ServiceExecutor;
 import arc.mf.plugin.dtype.AssetType;
+import arc.mf.plugin.dtype.BooleanType;
 import arc.mf.plugin.dtype.EnumType;
 import arc.mf.plugin.dtype.StringType;
 import arc.xml.XmlDoc;
@@ -33,12 +34,14 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
         defn.add(new Interface.Element("where", StringType.DEFAULT, "Query to select the source assets.", 0, 1));
         defn.add(new Interface.Element("if-exists", new EnumType(new String[] { "ignore", "update" }),
                 "Action to take if the item already exists. Defaults to ignore.", 0, 1));
+        defn.add(new Interface.Element("import-file", BooleanType.DEFAULT,
+                "Import OMEKA file from the asset content if the asset has content. Defaults to true", 0, 1));
 
     }
 
     static void importItemFromAsset(ServiceExecutor executor, String assetId, XmlDoc.Element args,
             OmekaClient omekaClient, String site, String itemTypeId, ResultSet<Element> elements,
-            boolean ignoreIfExists, XmlWriter w) throws Throwable {
+            boolean ignoreIfExists, boolean importFile, XmlWriter w) throws Throwable {
 
         XmlDoc.Element ae = AssetUtils.getAssetMeta(executor, assetId);
         assetId = ae.value("@id");
@@ -115,12 +118,17 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
             executor.execute("asset.set", dm.root());
         }
 
-        w.add("item", new String[] { "asset", assetId, "exists", Boolean.toString(exists), "updated", "true" },
-                item.id());
-
-        // create OMEKA file
-        if (ae.elementExists("content")) {
-            // TODO:
+        if (ae.elementExists("content") && importFile) {
+            // import OMEKA file from asset content
+            w.push("item", new String[] { "asset", assetId, "exists", Boolean.toString(exists), "updated", "true" },
+                    item.id());
+            // TODO order?
+            SvcFileImportFromAsset.importFileFromAsset(executor, omekaClient, site, item.id(), assetId, args,
+                    ignoreIfExists, w);
+            w.pop();
+        } else {
+            w.add("item", new String[] { "asset", assetId, "exists", Boolean.toString(exists), "updated", "true" },
+                    item.id());
         }
 
     }
@@ -128,6 +136,7 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
     @Override
     protected void execute(OmekaClient omekaClient, XmlDoc.Element args, Inputs inputs, Outputs outputs, XmlWriter w)
             throws Throwable {
+        boolean importFile = args.booleanValue("import-file", true);
         Set<String> assetIds = new LinkedHashSet<String>();
         if (args.elementExists("id")) {
             assetIds.addAll(args.values("id"));
@@ -170,7 +179,7 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
 
         for (String assetId : assetIds) {
             importItemFromAsset(executor(), assetId, args, omekaClient, siteTitle, itemTypeId, elements, ignoreIfExists,
-                    w);
+                    importFile, w);
         }
     }
 
@@ -181,7 +190,7 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
 
     @Override
     public String description() {
-        return "Import OMEKA items for the specified assets.";
+        return "Import OMEKA items from the specified assets.";
     }
 
     @Override
