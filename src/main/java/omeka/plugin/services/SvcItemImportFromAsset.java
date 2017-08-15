@@ -29,21 +29,22 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
 
     public SvcItemImportFromAsset() {
         SvcItemCreate.addToDefinition(defn, true);
-        defn.add(new Interface.Element("id", AssetType.DEFAULT,
-                "The id of the source asset.", 0, Integer.MAX_VALUE));
+        defn.add(new Interface.Element("id", AssetType.DEFAULT, "The id of the source asset.", 0, Integer.MAX_VALUE));
         defn.add(new Interface.Element("where", StringType.DEFAULT, "Query to select the source assets.", 0, 1));
         defn.add(new Interface.Element("if-exists", new EnumType(new String[] { "ignore", "update" }),
-                "Action to take if the item already exists. Defaults to ignore."));
+                "Action to take if the item already exists. Defaults to ignore.", 0, 1));
 
     }
 
     static void importItemFromAsset(ServiceExecutor executor, String assetId, XmlDoc.Element args,
             OmekaClient omekaClient, String site, String itemTypeId, ResultSet<Element> elements,
-            boolean ignoreIfExists) throws Throwable {
+            boolean ignoreIfExists, XmlWriter w) throws Throwable {
 
         XmlDoc.Element ae = AssetUtils.getAssetMeta(executor, assetId);
+        assetId = ae.value("@id");
         XmlDoc.Element iie = ae.element("meta/" + ITEM_IDENTITY_DOC_TYPE);
         Item item = null;
+        boolean exists = false;
         if (iie != null) {
             XmlDoc.Element itemElement = null;
             List<XmlDoc.Element> ies = iie.elements("item");
@@ -68,8 +69,13 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
                     }
                 }
                 // already exists and ignore.
-                if (item != null && ignoreIfExists) {
-                    return;
+                if (item != null) {
+                    exists = true;
+                    if (ignoreIfExists) {
+                        w.add("item", new String[] { "asset", assetId, "exists", Boolean.toString(exists), "updated",
+                                "false" }, item.id());
+                        return;
+                    }
                 }
             }
 
@@ -84,17 +90,19 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
             item = omekaClient.createItem(ib);
 
             // update asset metadata
-            XmlDocMaker dm = new XmlDocMaker();
+            XmlDocMaker dm = new XmlDocMaker("args");
             dm.push("meta", new String[] { "action", "replace" });
             dm.push(ITEM_IDENTITY_DOC_TYPE);
-            List<XmlDoc.Element> ies = iie.elements("item");
-            if (ies != null) {
-                for (XmlDoc.Element ie : ies) {
-                    String url = ie.value("@url");
-                    if (url != null && url.startsWith(omekaClient.endPoint())) {
-                        continue;
+            if (iie != null) {
+                List<XmlDoc.Element> ies = iie.elements("item");
+                if (ies != null) {
+                    for (XmlDoc.Element ie : ies) {
+                        String url = ie.value("@url");
+                        if (url != null && url.startsWith(omekaClient.endPoint())) {
+                            continue;
+                        }
+                        dm.add(ie);
                     }
-                    dm.add(ie);
                 }
             }
             dm.add("item", new String[] { "site", site, "collection",
@@ -103,13 +111,18 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
             dm.pop();
             dm.pop();
             dm.add("id", assetId);
+            System.out.println(dm.root());
             executor.execute("asset.set", dm.root());
         }
+
+        w.add("item", new String[] { "asset", assetId, "exists", Boolean.toString(exists), "updated", "true" },
+                item.id());
 
         // create OMEKA file
         if (ae.elementExists("content")) {
             // TODO:
         }
+
     }
 
     @Override
@@ -156,8 +169,8 @@ public class SvcItemImportFromAsset extends OmekaPluginService {
         String siteTitle = site == null ? null : site.title();
 
         for (String assetId : assetIds) {
-            importItemFromAsset(executor(), assetId, args, omekaClient, siteTitle, itemTypeId, elements,
-                    ignoreIfExists);
+            importItemFromAsset(executor(), assetId, args, omekaClient, siteTitle, itemTypeId, elements, ignoreIfExists,
+                    w);
         }
     }
 

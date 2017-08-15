@@ -38,7 +38,7 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
         SvcFileCreate.addToDefinition(defn, true);
 
         defn.add(new Interface.Element("if-exists", new EnumType(new String[] { "ignore", "update" }),
-                "Action to take if the file already exists in OMEKA. Defaults to ignore."));
+                "Action to take if the file already exists in OMEKA. Defaults to ignore.", 0, 1));
 
     }
 
@@ -67,12 +67,12 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
 
         long itemId = args.longValue("item");
         for (String assetId : assetIds) {
-            importFileFromAsset(executor(), omekaClient, siteTitle, itemId, assetId, args, ignoreIfExists);
+            importFileFromAsset(executor(), omekaClient, siteTitle, itemId, assetId, args, ignoreIfExists, w);
         }
     }
 
     private static void importFileFromAsset(ServiceExecutor executor, OmekaClient omekaClient, String site, long itemId,
-            String assetId, XmlDoc.Element args, boolean ignoreIfExists) throws Throwable {
+            String assetId, XmlDoc.Element args, boolean ignoreIfExists, XmlWriter w) throws Throwable {
         XmlDoc.Element ae = AssetUtils.getAssetMeta(executor, assetId);
         assetId = ae.value("@id");
         if (!ae.elementExists("content")) {
@@ -80,6 +80,7 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
         }
         XmlDoc.Element fie = ae.element("meta/" + FILE_IDENTITY_DOC_TYPE);
         File file = null;
+        boolean exists = false;
         if (fie != null) {
             XmlDoc.Element fileElement = null;
             List<XmlDoc.Element> fes = fie.elements("file");
@@ -106,8 +107,11 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
                 }
                 // already exists
                 if (file != null) {
+                    exists = true;
                     if (ignoreIfExists) {
                         // ignore
+                        w.add("file", new String[] { "asset", assetId, "exists", Boolean.toString(exists), "updated",
+                                "false" }, file.id());
                         return;
                     } else {
                         // delete existing file
@@ -123,18 +127,20 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
         file = omekaClient.createFile(fb);
 
         // update asset metadata
-        XmlDocMaker dm = new XmlDocMaker();
+        XmlDocMaker dm = new XmlDocMaker("args");
         dm.push("meta", new String[] { "action", "replace" });
         dm.push(FILE_IDENTITY_DOC_TYPE);
-        List<XmlDoc.Element> fes = fie.elements("file");
-        if (fes != null) {
-            for (XmlDoc.Element fe : fes) {
-                long item = fe.longValue("@item");
-                String url = fe.value("@url");
-                if (item == itemId && url != null && url.startsWith(omekaClient.endPoint())) {
-                    continue;
+        if (fie != null) {
+            List<XmlDoc.Element> fes = fie.elements("file");
+            if (fes != null) {
+                for (XmlDoc.Element fe : fes) {
+                    long item = fe.longValue("@item");
+                    String url = fe.value("@url");
+                    if (item == itemId && url != null && url.startsWith(omekaClient.endPoint())) {
+                        continue;
+                    }
+                    dm.add(fe);
                 }
-                dm.add(fe);
             }
         }
         dm.add("file", new String[] { "site", site, "item", Long.toString(itemId), "url", file.url() }, file.id());
@@ -143,6 +149,8 @@ public class SvcFileImportFromAsset extends OmekaPluginService {
         dm.add("id", assetId);
         executor.execute("asset.set", dm.root());
 
+        w.add("file", new String[] { "asset", assetId, "exists", Boolean.toString(exists), "updated", "true" },
+                file.id());
     }
 
     @Override
