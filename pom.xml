@@ -113,7 +113,7 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<file>src/main/mfpkg/__manifest.xml</file>
+							<file>${project.basedir}/src/main/mfpkg/__manifest.xml</file>
 							<outputFile>${project.build.directory}/__manifest.xml</outputFile>
 							<regex>false</regex>
 							<replacements>
